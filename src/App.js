@@ -1,6 +1,6 @@
-import React from 'react';
 import 'rbx/index.css';
 import { Button, Container, Title } from 'rbx';
+import React, { useState, useEffect } from 'react';
 
 const schedule = {
   "title": "CS Courses for 2018-2019",
@@ -45,7 +45,7 @@ const Course = ({ course }) => (
 );
 
 const Banner = ({ title }) => (
-    <Title>{ title }</Title>
+    <Title>{ title || '[loading...]' }</Title>
 );
 
 const CourseList = ({ courses }) => (
@@ -54,11 +54,26 @@ const CourseList = ({ courses }) => (
     </Button.Group>
 );
 
-const App = () =>  (
-    <Container>
-      <Banner title={ schedule.title } />
-      <CourseList courses={ schedule.courses } />
-    </Container>
-);
+const App = () => {
+  const [schedule, setSchedule] = useState({ title: '', courses: [] });
+  const url = 'https://courses.cs.northwestern.edu/394/data/cs-courses.php';
+
+  useEffect(() => {
+    const fetchSchedule = async () => {
+      const response = await fetch(url);
+      if (!response.ok) throw response;
+      const json = await response.json();
+      setSchedule(json);
+    };
+    fetchSchedule();
+  }, []);
+
+  return (
+      <Container>
+        <Banner title={ schedule.title } />
+        <CourseList courses={ schedule.courses } />
+      </Container>
+  );
+};
 
 export default App;
